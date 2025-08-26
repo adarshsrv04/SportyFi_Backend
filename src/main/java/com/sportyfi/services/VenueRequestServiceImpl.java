@@ -31,18 +31,23 @@ public class VenueRequestServiceImpl implements VenueRequestService {
 //        VenueRequest venue = dto;
 
         if (images != null) {
-            List<VenueImage> imageEntities = images.stream().map(file -> {
-                try {
-                    VenueImage img = new VenueImage();
-                    img.setData(file.getBytes());
-                    img.setVenueRequest(venue);
-                    return img;
-                } catch (IOException e) {
-                    throw new RuntimeException("Error processing image", e);
-                }
-            }).collect(Collectors.toList());
-
-//            venue.setImages(imageEntities);
+        	for (MultipartFile file : images) {
+                System.out.println("Received image: " + file.getOriginalFilename());
+            }
+//            List<byte[]> imageEntities = images.stream().map(file -> {
+//                try {
+//                    byte[] img;
+//                    img = file.getBytes();
+////                    img.setData(file.getBytes());
+////                    img.setVenueRequest(venue);
+//                    return img;
+//                } catch (IOException e) {
+//                    throw new RuntimeException("Error processing image", e);
+//                }
+//            }).collect(Collectors.toList());
+//
+//            venue.setVenueImages(imageEntities);
+//            System.out.println("venue------" + venue.toString());
         }
 
         dao.save(venue);

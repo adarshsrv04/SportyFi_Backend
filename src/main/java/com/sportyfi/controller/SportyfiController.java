@@ -22,21 +22,6 @@ public class SportyfiController {
 	
 	@Autowired
 	private SportyfiService sportyfiService;
-	
-	@GetMapping("/bookings")
-    public List<Bookings> getAllBookings() {
-        return sportyfiService.findAllBookings();
-    }
-
-    @GetMapping("/booking/{id}")
-    public Optional<Bookings> getBookingById(@PathVariable UUID id) {
-        return sportyfiService.findBookingById(id);
-    }
-
-    @PostMapping("/createBooking")
-    public Bookings createBooking(@RequestBody Bookings booking) {
-        return sportyfiService.saveBooking(booking);
-    }
     
     @GetMapping("/matches")
     public ResponseEntity<List<Matches>> getAllMatches(@RequestParam(required = false) String sport) {

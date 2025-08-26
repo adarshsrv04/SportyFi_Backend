@@ -2,6 +2,7 @@ package com.sportyfi.entity;
 
 import jakarta.persistence.*;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -48,6 +49,9 @@ public class VenueRequest {
 
     @Column(name = "updated_at")
     private ZonedDateTime updated_at = ZonedDateTime.now();
+    
+    @Column(name = "images", columnDefinition = "bytea[]")
+    private byte[][] venueImages;
 
 	public UUID getId() {
 		return id;
@@ -152,13 +156,17 @@ public class VenueRequest {
 	public void setUpdated_at(ZonedDateTime updated_at) {
 		this.updated_at = updated_at;
 	}
+	
+	public byte[][] getVenueImages() { return venueImages; }
+    public void setVenueImages(byte[][] venueImages) { this.venueImages = venueImages; }
 
 	@Override
 	public String toString() {
 		return "VenueRequest [id=" + id + ", name=" + name + ", description=" + description + ", location=" + location
 				+ ", price_per_hour=" + price_per_hour + ", contact_phone=" + contact_phone + ", contact_email="
-				+ contact_email + ", sports=" + sports + ", amenities=" + amenities + ", owner_id=" + owner_id
-				+ ", status=" + status + ", created_at=" + created_at + ", updated_at=" + updated_at + "]";
+				+ contact_email + ", sports=" + Arrays.toString(sports) + ", amenities=" + Arrays.toString(amenities)
+				+ ", owner_id=" + owner_id + ", status=" + status + ", created_at=" + created_at + ", updated_at="
+				+ updated_at + ", venueImages=" + Arrays.toString(venueImages) + "]";
 	}
 }
 

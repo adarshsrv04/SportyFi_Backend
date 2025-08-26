@@ -19,24 +19,6 @@ public class SportyfiServiceImpl implements SportyfiService {
 	SportyfiDao sportyfiDao;
 
 	@Override
-	public List<Bookings> findAllBookings() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Bookings saveBooking(Bookings bookings) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Optional<Bookings> findBookingById(UUID id) {
-		// TODO Auto-generated method stub
-		return Optional.empty();
-	}
-
-	@Override
 	public List<Matches> findAllMatches(String sport) {
 		return sportyfiDao.findAllMatches(sport);
 	}

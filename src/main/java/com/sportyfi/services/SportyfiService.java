@@ -9,11 +9,11 @@ import com.sportyfi.entity.Matches;
 
 public interface SportyfiService {
 
-	List<Bookings> findAllBookings();
-
-	Bookings saveBooking(Bookings bookings);
-
-	Optional<Bookings> findBookingById(UUID id);
+//	List<Bookings> findAllBookings();
+//
+//	Bookings saveBooking(Bookings bookings);
+//
+//	Optional<Bookings> findBookingById(UUID id);
 
 	List<Matches> findAllMatches(String sport);
 

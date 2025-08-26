@@ -29,17 +29,18 @@ public class VenueRequestController {
         @RequestPart("venue") VenueRequest venueRequestDto,
         @RequestPart(value = "images", required = false) List<MultipartFile> images
     ) {
+    	System.out.println(venueRequestDto.toString() + " " + images);
     	service.createVenueRequest(venueRequestDto, images);
         return ResponseEntity.ok("Venue Request submitted!");
     }
 
 
-    @GetMapping("/{id}")
+    @GetMapping("/verification/{id}")
     public ResponseEntity<VenueRequest> get(@PathVariable UUID id) {
         return ResponseEntity.ok(service.getById(id));
     }
 
-    @GetMapping
+    @GetMapping("/requested-venues")
     public ResponseEntity<List<VenueRequest>> getAll() {
         return ResponseEntity.ok(service.getAll());
     }

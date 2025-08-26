@@ -28,7 +28,12 @@ public class VenueRequestDaoImpl implements VenueRequestDao {
 
     @Override
     public VenueRequest findById(UUID id) {
-        return sessionFactory.getCurrentSession().get(VenueRequest.class, id);
+        Session session = sessionFactory.openSession();
+
+        VenueRequest venueRequest = session.get(VenueRequest.class, id);
+        session.close();
+        return venueRequest;
+//        return sessionFactory.getCurrentSession().get(VenueRequest.class, id);
     }
 
     @Override
