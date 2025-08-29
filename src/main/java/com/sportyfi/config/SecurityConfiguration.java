@@ -34,8 +34,10 @@ public class SecurityConfiguration {
 		.cors().and()
 		.csrf().disable() // Disable CSRF for API calls
 		.authorizeRequests()
-        .requestMatchers("/sportyfi/auth/**", "/sportyfi/*", "/sportyfi/matches/*", "/sportyfi/match/**", "/sportyfi/venues/**", "/sportyfi/venues/verification/**",
-        		"/sportyfi/venues/approve/**", "/sportyfi/participants/*", "/sportyfi/match/update/**", "/sportyfi/profiles/**", "/sportyfi/profiles/update/**",
+        .requestMatchers("/sportyfi/auth/**", "/sportyfi/*", "/sportyfi/matches/*", 
+        		"/sportyfi/match/**", "/sportyfi/venues/**", "/sportyfi/venues/verification/**",
+        		"/sportyfi/venues/approve/**", "/sportyfi/bookings/**", "/sportyfi/participants/*", 
+        		"/sportyfi/match/update/**", "/sportyfi/profiles/**", "/sportyfi/profiles/update/**",
         		"/sportyfi/deleteParticipant/*", "/ws/orders").permitAll()
         .anyRequest().authenticated();
         return http.build();

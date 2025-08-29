@@ -7,8 +7,10 @@ import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
+import org.hibernate.annotations.CreationTimestamp;
+
 @Entity
-@Table(name = "bookings")
+@Table(name = "bookings", schema = "public")
 public class Bookings {
 
     @Id
@@ -17,33 +19,35 @@ public class Bookings {
     private UUID id;
 
     @Column(name = "venue_id", nullable = false, columnDefinition = "uuid")
-    private UUID venueId;
+    private UUID venue_id;
 
     @Column(name = "user_id", nullable = false, columnDefinition = "uuid")
-    private UUID userId;
+    private UUID user_id;
 
     @Column(name = "booking_date", nullable = false)
-    private LocalDate bookingDate;
+    private LocalDate booking_date;
 
     @Column(name = "start_time", nullable = false)
-    private LocalTime startTime;
+    private LocalTime start_time;
 
     @Column(name = "end_time", nullable = false)
-    private LocalTime endTime;
+    private LocalTime end_time;
 
     @Column(nullable = false)
     private String status = "pending";
 
     @Column(name = "total_price", nullable = false)
-    private BigDecimal totalPrice;
+    private BigDecimal total_price;
 
     private String notes;
 
+    @CreationTimestamp
     @Column(name = "created_at", nullable = false)
-    private ZonedDateTime createdAt;
+    private ZonedDateTime created_at;
 
+    @CreationTimestamp
     @Column(name = "updated_at", nullable = false)
-    private ZonedDateTime updatedAt;
+    private ZonedDateTime updated_at;
 
 	public UUID getId() {
 		return id;
@@ -53,44 +57,44 @@ public class Bookings {
 		this.id = id;
 	}
 
-	public UUID getVenueId() {
-		return venueId;
+	public UUID getVenue_id() {
+		return venue_id;
 	}
 
-	public void setVenueId(UUID venueId) {
-		this.venueId = venueId;
+	public void setVenue_id(UUID venue_id) {
+		this.venue_id = venue_id;
 	}
 
-	public UUID getUserId() {
-		return userId;
+	public UUID getUser_id() {
+		return user_id;
 	}
 
-	public void setUserId(UUID userId) {
-		this.userId = userId;
+	public void setUser_id(UUID user_id) {
+		this.user_id = user_id;
 	}
 
-	public LocalDate getBookingDate() {
-		return bookingDate;
+	public LocalDate getBooking_date() {
+		return booking_date;
 	}
 
-	public void setBookingDate(LocalDate bookingDate) {
-		this.bookingDate = bookingDate;
+	public void setBooking_date(LocalDate booking_date) {
+		this.booking_date = booking_date;
 	}
 
-	public LocalTime getStartTime() {
-		return startTime;
+	public LocalTime getStart_time() {
+		return start_time;
 	}
 
-	public void setStartTime(LocalTime startTime) {
-		this.startTime = startTime;
+	public void setStart_time(LocalTime start_time) {
+		this.start_time = start_time;
 	}
 
-	public LocalTime getEndTime() {
-		return endTime;
+	public LocalTime getEnd_time() {
+		return end_time;
 	}
 
-	public void setEndTime(LocalTime endTime) {
-		this.endTime = endTime;
+	public void setEnd_time(LocalTime end_time) {
+		this.end_time = end_time;
 	}
 
 	public String getStatus() {
@@ -101,12 +105,12 @@ public class Bookings {
 		this.status = status;
 	}
 
-	public BigDecimal getTotalPrice() {
-		return totalPrice;
+	public BigDecimal getTotal_price() {
+		return total_price;
 	}
 
-	public void setTotalPrice(BigDecimal totalPrice) {
-		this.totalPrice = totalPrice;
+	public void setTotal_price(BigDecimal total_price) {
+		this.total_price = total_price;
 	}
 
 	public String getNotes() {
@@ -117,20 +121,21 @@ public class Bookings {
 		this.notes = notes;
 	}
 
-	public ZonedDateTime getCreatedAt() {
-		return createdAt;
+	public ZonedDateTime getCreated_at() {
+		return created_at;
 	}
 
-	public void setCreatedAt(ZonedDateTime createdAt) {
-		this.createdAt = createdAt;
+	public void setCreated_at(ZonedDateTime created_at) {
+		this.created_at = created_at;
 	}
 
-	public ZonedDateTime getUpdatedAt() {
-		return updatedAt;
+	public ZonedDateTime getUpdated_at() {
+		return updated_at;
 	}
 
-	public void setUpdatedAt(ZonedDateTime updatedAt) {
-		this.updatedAt = updatedAt;
-	}  
+	public void setUpdated_at(ZonedDateTime updated_at) {
+		this.updated_at = updated_at;
+	}
+
 }
 

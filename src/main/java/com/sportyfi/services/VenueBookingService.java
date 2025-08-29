@@ -5,23 +5,24 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.sportyfi.dao.VenueBookingDao;
 import com.sportyfi.entity.Bookings;
 
+@Service
 public class VenueBookingService {
 	
 	@Autowired
 	VenueBookingDao bookingDao;
 	
-	public List<Bookings> findAllBookings() {
-		// TODO Auto-generated method stub
-		return null;
+	public List<Bookings> findAllBookings(UUID userId) {
+		return bookingDao.findAllBookings(userId);
 	}
 
 	public Bookings saveBooking(Bookings bookings) {
 		// TODO Auto-generated method stub
-		return null;
+		return bookingDao.saveBooking(bookings);
 	}
 
 	public Optional<Bookings> findBookingById(UUID id) {
