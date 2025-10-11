@@ -18,10 +18,8 @@ public class AuthResponse {
 	}
     
     public AuthResponse(String accessToken2, String refreshToken2, Users user2) {
-		// TODO Auto-generated constructor stub
 		this.accessToken = accessToken2;
         this.refreshToken = refreshToken2;
-//        this.userType = userType2;
         this.user = new UserDto(user2);
         System.out.println(this.user);
 	}

@@ -19,8 +19,8 @@ public class SportyfiServiceImpl implements SportyfiService {
 	SportyfiDao sportyfiDao;
 
 	@Override
-	public List<Matches> findAllMatches(String sport) {
-		return sportyfiDao.findAllMatches(sport);
+	public List<Matches> findAllMatches(String sport, String city, String date) {
+		return sportyfiDao.findAllMatches(sport, city, date);
 	}
 	
 	@Override

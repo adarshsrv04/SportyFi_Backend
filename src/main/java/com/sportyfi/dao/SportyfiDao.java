@@ -7,7 +7,7 @@ import com.sportyfi.entity.Matches;
 
 public interface SportyfiDao {
 
-	public List<Matches> findAllMatches(String sport);
+	public List<Matches> findAllMatches(String sport, String city, String date);
 
 	public Matches findMatchById(UUID id);
 

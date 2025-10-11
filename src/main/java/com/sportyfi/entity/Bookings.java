@@ -48,6 +48,17 @@ public class Bookings {
     @CreationTimestamp
     @Column(name = "updated_at", nullable = false)
     private ZonedDateTime updated_at;
+    
+    @Transient
+    private Venues venue;
+
+    public Venues getVenue() {
+        return venue;
+    }
+
+    public void setVenue(Venues venue) {
+        this.venue = venue;
+    }
 
 	public UUID getId() {
 		return id;

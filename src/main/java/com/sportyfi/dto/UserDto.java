@@ -13,6 +13,8 @@ public class UserDto {
     private Boolean emailVerified;
     private LocalDateTime lastLogin;
     private LocalDateTime createdAt;
+    
+    public UserDto() {}
 
     // Constructor to convert from Users entity
     public UserDto(Users user) {

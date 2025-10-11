@@ -8,6 +8,12 @@ import jakarta.persistence.*;
 @Entity
 @Table(name = "users", schema = "auth_spring")
 public class Users {
+	
+	public enum AuthProvider {
+	    LOCAL,   // signup with email/password
+	    GOOGLE,   // signup via Google OAuth
+	    APPLE
+	}
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,6 +35,18 @@ public class Users {
     private LocalDateTime lastLogin;
 
     private LocalDateTime createdAt = LocalDateTime.now();
+    
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private AuthProvider authProvider;
+
+	public AuthProvider getAuthProvider() {
+		return authProvider;
+	}
+
+	public void setAuthProvider(AuthProvider authprovider) {
+		this.authProvider = authprovider;
+	}
 
 	public UUID getId() {
 		return id;
@@ -89,9 +107,9 @@ public class Users {
 	@Override
 	public String toString() {
 		return "Users [id=" + id + ", email=" + email + ", password=" + password + ", emailVerified=" + emailVerified
-				+ ", userType=" + userType + ", lastLogin=" + lastLogin + ", createdAt=" + createdAt + "]";
+				+ ", userType=" + userType + ", lastLogin=" + lastLogin + ", createdAt=" + createdAt + ", authProvider="
+				+ authProvider + "]";
 	}
-
 	
 }
 

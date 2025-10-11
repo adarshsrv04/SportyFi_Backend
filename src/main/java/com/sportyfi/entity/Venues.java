@@ -21,8 +21,19 @@ public class Venues {
 
     @Column(nullable = false)
     private String location;
+    
+    @Column(name = "city", nullable = false)
+    private String city;
 
-    @Column
+    public String getCity() {
+		return city;
+	}
+
+	public void setCity(String city) {
+		this.city = city;
+	}
+
+	@Column
     private Double latitude;
 
     @Column
@@ -178,10 +189,11 @@ public class Venues {
 	@Override
 	public String toString() {
 		return "Venues [id=" + id + ", name=" + name + ", description=" + description + ", location=" + location
-				+ ", latitude=" + latitude + ", longitude=" + longitude + ", price_per_hour=" + price_per_hour
-				+ ", contact_phone=" + contact_phone + ", contact_email=" + contact_email + ", is_verified="
-				+ is_verified + ", owner_id=" + owner_id + ", created_at=" + created_at + ", updated_at=" + updated_at
-				+ ", sports=" + Arrays.toString(sports) + ", amenities=" + Arrays.toString(amenities) + "]";
+				+ ", city=" + city + ", latitude=" + latitude + ", longitude=" + longitude + ", price_per_hour="
+				+ price_per_hour + ", contact_phone=" + contact_phone + ", contact_email=" + contact_email
+				+ ", is_verified=" + is_verified + ", owner_id=" + owner_id + ", created_at=" + created_at
+				+ ", updated_at=" + updated_at + ", sports=" + Arrays.toString(sports) + ", amenities="
+				+ Arrays.toString(amenities) + "]";
 	}
     
 }

@@ -6,6 +6,8 @@ import java.util.UUID;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,23 +20,40 @@ public class SportyfiUserDaoImpl implements SportyfiUserDao {
 
 	@Autowired
     private SessionFactory sessionFactory;
+	
+	private static final Logger log = LoggerFactory.getLogger(SportyfiUserDao.class);
+
 
 	@Override
-	@Transactional
+//	@Transactional
     public void saveUser(Users user) {
-//        sessionFactory.getCurrentSession().persist(user);
 		Transaction tx = null;
         try (Session session = sessionFactory.openSession()) {
 	        tx = session.beginTransaction();
 
 	        session.persist(user);  // Hibernate handles the SQL generation
 	        tx.commit();
-
+//	        createProfileForUser(user.getId(), user.getCreatedAt(), user.getUserType().toString());
 	    } catch (Exception e) {
 	        if (tx != null) tx.rollback();
-	        e.printStackTrace();
+	        log.error("---ExceptionsaveUser1---", e);
 	    }
-        createProfileForUser(user.getId(), user.getCreatedAt(), user.getUserType().toString());
+        createProfileForUser(user.getId(), user.getCreatedAt(), user.getUserType().toString(), null);
+    }
+	
+	public void saveGoogleUser(Users user, String name) {
+		Transaction tx = null;
+        try (Session session = sessionFactory.openSession()) {
+	        tx = session.beginTransaction();
+
+	        session.save(user);  // Hibernate handles the SQL generation
+	        tx.commit();
+//	        createProfileForUser(user.getId(), user.getCreatedAt(), user.getUserType().toString());
+	    } catch (Exception e) {
+	        if (tx != null) tx.rollback();
+	        log.error("---ExceptionsaveUser1---", e);
+	    }
+        createProfileForUser(user.getId(), user.getCreatedAt(), user.getUserType().toString(), name);
     }
 
 	@Override
@@ -78,7 +97,6 @@ public class SportyfiUserDaoImpl implements SportyfiUserDao {
 	    return user;
 	}
 
-
 	@Override
 	@Transactional
     public boolean existsByEmail(String email) {
@@ -116,7 +134,7 @@ public class SportyfiUserDaoImpl implements SportyfiUserDao {
 //	    }
 //	}
 	
-	public void createProfileForUser(UUID userId, LocalDateTime createdAt, String userType) {
+	public void createProfileForUser(UUID userId, LocalDateTime createdAt, String userType, String name) {
 	    Transaction tx = null;
 	    try (Session session = sessionFactory.openSession()) {
 	        tx = session.beginTransaction();
@@ -126,6 +144,7 @@ public class SportyfiUserDaoImpl implements SportyfiUserDao {
 	        if (existingProfile == null) {
 	            Profiles profile = new Profiles();
 	            profile.setId(userId);
+	            profile.setUsername(name);
 	            profile.setCreated_at(createdAt);
 	            profile.setUpdated_at(createdAt);
 	            profile.setRole(userType);
@@ -135,8 +154,15 @@ public class SportyfiUserDaoImpl implements SportyfiUserDao {
 	        tx.commit();
 	    } catch (Exception e) {
 	        if (tx != null) tx.rollback();
-	        e.printStackTrace();
+	        log.error("---ExceptioncreateProfileForUser---", e);
 	    }
 	}
+	
+	@Override
+    public Users getUserById(UUID userId) {
+        try (Session session = sessionFactory.openSession()) {
+            return session.get(Users.class, userId);
+        }
+    }
 }
 

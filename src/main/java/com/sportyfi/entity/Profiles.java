@@ -41,6 +41,9 @@ public class Profiles {
 
 	@Column(name = "primary_sport")
 	private String primary_sport;
+	
+	@Column(name = "contact_phone")
+	private String contact_phone;
 
 	// Getters and Setters
 
@@ -88,13 +91,19 @@ public class Profiles {
 	public void setPrimary_sport(String primary_sport) {
 		this.primary_sport = primary_sport;
 	}
+	public String getContact_phone() {
+		return contact_phone;
+	}
+	public void setContact_phone(String contact_phone) {
+		this.contact_phone = contact_phone;
+	}
+	
 	@Override
 	public String toString() {
 		return "Profiles [id=" + id + ", username=" + username + ", avatar_url=" + avatar_url + ", created_at="
 				+ created_at + ", updated_at=" + updated_at + ", role=" + role + ", bio=" + bio + ", preferred_sports="
 				+ Arrays.toString(preferred_sports) + ", location=" + location + ", primary_sport=" + primary_sport
-				+ "]";
-	}	
-
+				+ ", contact_phone=" + contact_phone + "]";
+	}
 }
 

@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,8 +29,10 @@ import com.sportyfi.dto.UserDto;
 import com.sportyfi.entity.EmailVerificationToken;
 import com.sportyfi.entity.UserType;
 import com.sportyfi.entity.Users;
+import com.sportyfi.entity.Users.AuthProvider;
 import com.sportyfi.services.AuthService;
 import com.sportyfi.services.EmailService;
+import com.sportyfi.services.GoogleAuthService;
 import com.sportyfi.utilities.GoogleTokenVerifier;
 import com.sportyfi.utilities.JwtUtil;
 
@@ -38,142 +42,237 @@ import io.jsonwebtoken.ExpiredJwtException;
 @RequestMapping("/sportyfi/auth")
 public class AuthController {
 
-    @Autowired private AuthService authService;
-    
-    @Autowired private EmailService emailService;
-    
-    @Autowired private VerificationTokenDao tokenDao;
-    
-    @Autowired
-    private SportyfiUserDao userDao;
-    
-    @Autowired JwtUtil jwtService;
+	@Autowired
+	private AuthService authService;
 
-    @PostMapping("/signup")
-    public ResponseEntity<?> signup(@RequestBody SignupRequest req) {
-    	System.out.println(req.getEmail() + req.getPassword());
-        authService.register(req.getEmail(), req.getPassword(), req.getUserType());
-        return ResponseEntity.ok("Verification email sent");
-    }
+	@Autowired
+	private EmailService emailService;
 
-    @Transactional
-    @GetMapping("/verify-email")
-    public ResponseEntity<String> verifyEmail(@RequestParam("token") String tokenStr) {
-        EmailVerificationToken token = tokenDao.findByToken(tokenStr);
-        if (token == null) {
-            return ResponseEntity.badRequest().body("Invalid token.");
-        }
+	@Autowired
+	private VerificationTokenDao tokenDao;
 
-        if (token.getExpiryDate().isBefore(LocalDateTime.now())) {
-            return ResponseEntity.badRequest().body("Token has expired.");
-        }
+	@Autowired
+	private SportyfiUserDao userDao;
 
-        Users user = userDao.findByEmail(token.getEmail());
-        if (user == null) {
-            return ResponseEntity.badRequest().body("User not found.");
-        }
+	@Autowired
+	JwtUtil jwtUtil;
+	
+	@Autowired
+	private GoogleAuthService googleAuthService;
+	
+	private static final Logger log = LoggerFactory.getLogger(AuthController.class);
 
-        user.setEmailVerified(true);
-        userDao.updateUser(user);
-        tokenDao.deleteToken(tokenStr);
+	@PostMapping("/signup")
+	public ResponseEntity<?> signup(@RequestBody SignupRequest req) {
+		System.out.println(req.getEmail() + req.getPassword());
+		authService.register(req.getEmail(), req.getPassword(), req.getUserType());
+		return ResponseEntity.ok("Verification email sent");
+	}
 
-        return ResponseEntity.ok("Email verified successfully!");
-    }
+	@Transactional
+	@GetMapping("/verify-email")
+	public ResponseEntity<String> verifyEmail(@RequestParam("token") String tokenStr) {
+		EmailVerificationToken token = tokenDao.findByToken(tokenStr);
+		if (token == null) {
+			return ResponseEntity.badRequest().body("Invalid token.");
+		}
 
-    @PostMapping("/signin")
-    public ResponseEntity<?> signin(@RequestBody LoginRequest req) {
-        AuthResponse jwt = authService.login(req);
-        return ResponseEntity.ok((jwt));
-    }
-    
-    @PostMapping("/refresh")
-    public ResponseEntity<?> refreshAccessToken(@RequestBody Map<String, String> request) {
-        String refreshToken = request.get("refreshToken");
+		if (token.getExpiryDate().isBefore(LocalDateTime.now())) {
+			return ResponseEntity.badRequest().body("Token has expired.");
+		}
 
-        if (refreshToken == null || !jwtService.validateToken(refreshToken)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid refresh token");
-        }
+		Users user = userDao.findByEmail(token.getEmail());
+		if (user == null) {
+			return ResponseEntity.badRequest().body("User not found.");
+		}
 
-        String email = jwtService.extractUsername(refreshToken);
-        Users user = userDao.findByEmail(email);
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
-        }
+		user.setEmailVerified(true);
+		userDao.updateUser(user);
+		tokenDao.deleteToken(tokenStr);
 
-        String newAccessToken = jwtService.generateAccessToken(user);
+		return ResponseEntity.ok("Email verified successfully!");
+	}
 
-        Map<String, String> response = new HashMap<>();
-        response.put("accessToken", newAccessToken);
+	@PostMapping("/signin")
+	public ResponseEntity<?> signin(@RequestBody LoginRequest req) {
+		AuthResponse jwt = authService.login(req);
+		return ResponseEntity.ok((jwt));
+	}
 
-        return ResponseEntity.ok(response);
-    }
-    
-    @GetMapping("/me")
-    public ResponseEntity<?> getCurrentUser(@RequestHeader("Authorization") String authHeader) {
-        try {
-            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid Authorization header");
-            }
+	@PostMapping("/refresh")
+	public ResponseEntity<?> refreshAccessToken(@RequestBody Map<String, String> request) {
+		String refreshToken = request.get("refreshToken");
 
-            String token = authHeader.substring(7);
-            String email = jwtService.extractUsername(token);
-            if (email == null || !jwtService.validateToken(token)) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token");
-            }
+		if (refreshToken == null || !jwtUtil.validateToken(refreshToken)) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid refresh token");
+		}
 
-            Users user = userDao.findByEmail(email);
-            if (user == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
-            }
+		String email = jwtUtil.extractUsername(refreshToken);
+		Users user = userDao.findByEmail(email);
+		if (user == null) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+		}
 
-            return ResponseEntity.ok(new UserDto(user));
-        } catch (ExpiredJwtException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Access token expired");
-        } catch (Exception e) {
-        	e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
-        }
-    }
-    
-    @GetMapping("/secure-data")
-    public ResponseEntity<?> getSecureData(Authentication authentication) {
-        String email = authentication.getName(); // Retrieved from token subject
-        return ResponseEntity.ok("Hello " + email + ", this is protected data.");
-    }
-    
-    @PostMapping("/google")
-    public ResponseEntity<?> googleLogin(@RequestBody Map<String, String> body) {
-        String idToken = body.get("idToken");
-        System.out.println("idToken: " + idToken);
-        GoogleIdToken.Payload payload = GoogleTokenVerifier.verifyToken(idToken);
+		String newAccessToken = jwtUtil.generateAccessToken(user);
 
-        if (payload == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
-        }
+		Map<String, String> response = new HashMap<>();
+		response.put("accessToken", newAccessToken);
 
-        String email = payload.getEmail();
-        String name = (String) payload.get("name");
+		return ResponseEntity.ok(response);
+	}
 
-        // Check if user exists
-        Users user = userDao.findByEmail(email);
-        if (user == null) {
-            // Create new user
-            user = new Users();
-            user.setEmail(email);
-//            user.setFullName(name);
-            user.setEmailVerified(true);
-            user.setUserType(UserType.USER);
-            user.setCreatedAt(LocalDateTime.now());
-//            user.setUpdatedAt(LocalDateTime.now());
-            userDao.saveUser(user);
-        }
+	// errororoororoorororo
+	@GetMapping("/me")
+	public ResponseEntity<?> getCurrentUser(@RequestHeader("Authorization") String authHeader) {
+		try {
+			if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid Authorization header");
+			}
 
-        // Generate JWT tokens
-        String accessToken = jwtService.generateAccessToken(user);
-        String refreshToken = jwtService.generateRefreshToken(user);
+			String token = authHeader.substring(7);
+			String email = jwtUtil.extractUsername(token);
+			if (email == null || !jwtUtil.validateToken(token)) {
+				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token");
+			}
 
-        return ResponseEntity.ok(new AuthResponse(accessToken, refreshToken, user));
-    }
+			Users user = userDao.findByEmail(email);
+			if (user == null) {
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+			}
+
+			return ResponseEntity.ok(new UserDto(user));
+		} catch (ExpiredJwtException e) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Access token expired" + e.getMessage());
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
+		}
+	}
+
+	@GetMapping("/secure-data")
+	public ResponseEntity<?> getSecureData(Authentication authentication) {
+		String email = authentication.getName(); // Retrieved from token subject
+		return ResponseEntity.ok("Hello " + email + ", this is protected data.");
+	}
+
+//    @PostMapping("/google")
+//    public ResponseEntity<?> googleLogin(@RequestBody Map<String, String> body) {
+//        String idToken = body.get("idToken");
+//        System.out.println("idToken: " + idToken);
+//        GoogleIdToken.Payload payload = GoogleTokenVerifier.verifyToken(idToken);
+//
+//        if (payload == null) {
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+//        }
+//
+//        String email = payload.getEmail();
+//        String name = (String) payload.get("name");
+//
+//        // Check if user exists
+//        Users user = userDao.findByEmail(email);
+//        if (user == null) {
+//            // Create new user
+//            user = new Users();
+//            user.setEmail(email);
+////            user.setFullName(name);
+//            user.setEmailVerified(true);
+//            user.setUserType(UserType.USER);
+//            user.setCreatedAt(LocalDateTime.now());
+////            user.setUpdatedAt(LocalDateTime.now());
+//            userDao.saveUser(user);
+//        }
+//
+//        // Generate JWT tokens
+//        String accessToken = jwtUtil.generateAccessToken(user);
+//        String refreshToken = jwtUtil.generateRefreshToken(user);
+//
+//        return ResponseEntity.ok(new AuthResponse(accessToken, refreshToken, user));
+//    }
+
+//	@PostMapping("/google")
+//	public ResponseEntity<?> googleLogin(@RequestBody Map<String, String> body) {
+//		try {
+//			String code = body.get("code");
+//			GoogleIdToken.Payload payload = googleAuthService.verifyCode(code);
+//
+//			if (payload == null) {
+//				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+//			}
+//
+//			String email = payload.getEmail();
+//			String name = (String) payload.get("name");
+//
+//			Users user = userDao.findByEmail(email);
+//			if (user == null) {
+//				user = new Users();
+//				user.setEmail(email);
+//				user.setEmailVerified(true);
+//				user.setUserType(UserType.USER);
+//				user.setCreatedAt(LocalDateTime.now());
+//				userDao.saveUser(user);
+//			}
+//
+//			String accessToken = jwtUtil.generateAccessToken(user);
+//			String refreshToken = jwtUtil.generateRefreshToken(user);
+//
+//			return ResponseEntity.ok(new AuthResponse(accessToken, refreshToken, user));
+//
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//					.body("Google auth failed: " + e.getMessage());
+//		}
+//	}
+	
+	@PostMapping("/google")
+	public ResponseEntity<?> googleLogin(@RequestBody Map<String, String> body) {
+	    try {
+	        log.info("Incoming /auth/google request: {}", body);
+
+	        String code = body.get("code");
+	        log.info("Google auth code received: {}", code);
+
+	        GoogleIdToken.Payload payload = googleAuthService.verifyCode(code);
+	        log.info("Payload after verification: {}", payload);
+
+	        if (payload == null) {
+	            log.warn("Google verification failed, payload is null");
+	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+	        }
+
+	        String email = payload.getEmail();
+	        String name = (String) payload.get("name");
+	        log.info("Google user details - email: {}, name: {}", email, name);
+
+	        Users user = userDao.findByEmail(email);
+	        if (user == null) {
+	            log.info("New Google user, creating user in DB::");
+	            user = new Users();
+	            user.setEmail(email);
+	            user.setEmailVerified(true);
+	            user.setUserType(UserType.USER);
+	            user.setAuthProvider(AuthProvider.GOOGLE);
+	            user.setCreatedAt(LocalDateTime.now());
+	            user.setPassword("GOOGLE_AUTH");
+//	            if (user.getPassword() == null && user.getAuthProvider().equals("GOOGLE")) {
+//	                user.setPassword("GOOGLE_AUTH"); // dummy value, won’t be used
+//	            }
+	            userDao.saveGoogleUser(user, name);
+	        } else {
+	            log.info("Existing user found in DB: {}", user.getEmail());
+	        }
+
+	        String accessToken = jwtUtil.generateAccessToken(user);
+	        String refreshToken = jwtUtil.generateRefreshToken(user);
+	        log.info("JWT generated for user: {}", user.getEmail());
+
+	        return ResponseEntity.ok(new AuthResponse(accessToken, refreshToken, user));
+
+	    } catch (Exception e) {
+	        log.error("Google auth failed" + e);
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                .body("Google auth failed: " + e.getMessage());
+	    }
+	}
 
 }
-

@@ -15,7 +15,7 @@ public interface SportyfiService {
 //
 //	Optional<Bookings> findBookingById(UUID id);
 
-	List<Matches> findAllMatches(String sport);
+	List<Matches> findAllMatches(String sport, String city, String date);
 
 	Matches findMatchById(UUID matchId);
 

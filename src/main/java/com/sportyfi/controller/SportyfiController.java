@@ -23,15 +23,26 @@ public class SportyfiController {
 	@Autowired
 	private SportyfiService sportyfiService;
     
-    @GetMapping("/matches")
-    public ResponseEntity<List<Matches>> getAllMatches(@RequestParam(required = false) String sport) {
-    	if(sport != null) {
-    		System.out.println("reached---" + sport);
-    	} else {
-    		System.out.println("no sport---" + sport);
-    	}
-        return ResponseEntity.ok(sportyfiService.findAllMatches(sport));
-    }
+//    @GetMapping("/matches")
+//    public ResponseEntity<List<Matches>> getAllMatches(@RequestParam(required = false) String sport) {
+//    	if(sport != null) {
+//    		System.out.println("reached---" + sport);
+//    	} else {
+//    		System.out.println("no sport---" + sport);
+//    	}
+//        return ResponseEntity.ok(sportyfiService.findAllMatches(sport));
+//    }
+	
+	@GetMapping("/matches")
+	public ResponseEntity<List<Matches>> getAllMatches(
+	        @RequestParam(required = false) String sport,
+	        @RequestParam(required = false) String city,
+	        @RequestParam(required = false) String date) {
+
+	    System.out.println("Filters - sport: " + sport + ", city: " + city + ", date: " + date);
+
+	    return ResponseEntity.ok(sportyfiService.findAllMatches(sport, city, date));
+	}
     
     @GetMapping("/matches/city")
     public ResponseEntity<List<Matches>> getMatchesByCity(@RequestParam(required = false) String city) {

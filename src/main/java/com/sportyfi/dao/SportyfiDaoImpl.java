@@ -25,47 +25,95 @@ public class SportyfiDaoImpl implements SportyfiDao {
 	@Autowired
 	private SessionFactory sessionFactory;
 
+//	@Override
+//	public List<Matches> findAllMatches(String sport, String city, String date) {
+//		Session session = sessionFactory.openSession();
+//		Transaction tx = null;
+//		List<Matches> results = new ArrayList<>();
+//
+//		try {
+//			tx = session.beginTransaction();
+//
+//			StringBuilder queryStr = new StringBuilder("SELECT * FROM matches");
+//
+//			boolean hasCondition = false;
+//			if (sport != null && !sport.trim().isEmpty()) {
+//				queryStr.append(" WHERE sport = :sport");
+//				hasCondition = true;
+//			}
+//			if (hasCondition) {
+//				queryStr.append(" AND match_time > NOW()");
+//			} else {
+//				queryStr.append(" WHERE match_time > NOW()");
+//				hasCondition = true;
+//			}
+//			//	        }
+//			queryStr.append(" ORDER BY match_time DESC");
+//
+//			Query<Matches> query = session.createNativeQuery(queryStr.toString(), Matches.class);
+//
+//			if (sport != null && !sport.trim().isEmpty()) {
+//				query.setParameter("sport", sport);
+//			}
+//			results = query.getResultList();
+//			tx.commit();
+//		} catch (Exception e) {
+//			if (tx != null) tx.rollback();
+//			e.printStackTrace();
+//		} finally {
+//			session.close();
+//		}
+//		return results;
+//	}
+	
 	@Override
-	public List<Matches> findAllMatches(String sport) {
-		Session session = sessionFactory.openSession();
-		Transaction tx = null;
-		List<Matches> results = new ArrayList<>();
+	public List<Matches> findAllMatches(String sport, String city, String date) {
+	    Session session = sessionFactory.openSession();
+	    Transaction tx = null;
+	    List<Matches> results = new ArrayList<>();
 
-		try {
-			tx = session.beginTransaction();
+	    try {
+	        tx = session.beginTransaction();
 
-			StringBuilder queryStr = new StringBuilder("SELECT * FROM matches");
+	        StringBuilder queryStr = new StringBuilder("SELECT * FROM matches WHERE match_time > NOW()");
+	        
+	        if (sport != null && !sport.trim().isEmpty()) {
+	            queryStr.append(" AND sport = :sport");
+	        }
+	        if (city != null && !city.trim().isEmpty()) {
+	            queryStr.append(" AND city = :city");
+	        }
+	        if (date != null && !date.trim().isEmpty()) {
+	            // Compare only the date part, ignoring time
+	            queryStr.append(" AND DATE(match_time) = :matchDate");
+	        }
 
-			boolean hasCondition = false;
-			if (sport != null && !sport.trim().isEmpty()) {
-				queryStr.append(" WHERE sport = :sport");
-				hasCondition = true;
-			}
-			//	        if (onlyUpcoming) { // Assume this boolean parameter indicates whether to filter future matches
-			if (hasCondition) {
-				queryStr.append(" AND match_time > NOW()");
-			} else {
-				queryStr.append(" WHERE match_time > NOW()");
-				hasCondition = true;
-			}
-			//	        }
-			queryStr.append(" ORDER BY match_time DESC");
+	        queryStr.append(" ORDER BY match_time DESC");
 
-			Query<Matches> query = session.createNativeQuery(queryStr.toString(), Matches.class);
+	        Query<Matches> query = session.createNativeQuery(queryStr.toString(), Matches.class);
 
-			if (sport != null && !sport.trim().isEmpty()) {
-				query.setParameter("sport", sport);
-			}
-			results = query.getResultList();
-			tx.commit();
-		} catch (Exception e) {
-			if (tx != null) tx.rollback();
-			e.printStackTrace();
-		} finally {
-			session.close();
-		}
-		return results;
+	        if (sport != null && !sport.trim().isEmpty()) {
+	            query.setParameter("sport", sport);
+	        }
+	        if (city != null && !city.trim().isEmpty()) {
+	            query.setParameter("city", city);
+	        }
+	        if (date != null && !date.trim().isEmpty()) {
+	            query.setParameter("matchDate", java.sql.Date.valueOf(date)); 
+	            // expects "yyyy-MM-dd"
+	        }
+
+	        results = query.getResultList();
+	        tx.commit();
+	    } catch (Exception e) {
+	        if (tx != null) tx.rollback();
+	        e.printStackTrace();
+	    } finally {
+	        session.close();
+	    }
+	    return results;
 	}
+
 
 	@Override
 	public List<Matches> findMatchesByCity(String city) {

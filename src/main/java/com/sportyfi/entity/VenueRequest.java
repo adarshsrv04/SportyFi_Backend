@@ -17,8 +17,17 @@ public class VenueRequest {
     private String name;
     private String description;
     private String location;
+    private String city;
 
-    @Column(name = "price_per_hour", nullable = false)
+    public String getCity() {
+		return city;
+	}
+
+	public void setCity(String city) {
+		this.city = city;
+	}
+
+	@Column(name = "price_per_hour", nullable = false)
     private double price_per_hour;
 
     @Column(name = "contact_phone", nullable = false)

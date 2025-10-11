@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +18,7 @@ import com.sportyfi.entity.EmailVerificationToken;
 import com.sportyfi.entity.UserType;
 import com.sportyfi.entity.Users;
 import com.sportyfi.entity.VerificationToken;
+import com.sportyfi.entity.Users.AuthProvider;
 import com.sportyfi.exception.EmailNotVerifiedException;
 import com.sportyfi.utilities.JwtUtil;
 
@@ -37,6 +39,9 @@ public class AuthServiceImpl implements AuthService {
 
 	@Autowired
 	private EmailService emailService;
+	
+	@Value("${app.domain}")
+    private String appDomain;
 
 	@Override
 	@Transactional
@@ -55,11 +60,12 @@ public class AuthServiceImpl implements AuthService {
 		user.setEmail(email);
 		user.setPassword(passwordEncoder.encode(password));
 		user.setUserType(userType);
+		user.setAuthProvider(AuthProvider.LOCAL);
 		System.out.println(user.getUserType());
 		userDao.saveUser(user);
 		EmailVerificationToken token = new EmailVerificationToken(user.getEmail(), Duration.ofHours(24));
 		tokenDao.saveToken(token);
-		String verificationLink = "http://localhost:8080/sportyfi/auth/verify-email?token=" + token.getToken();
+		String verificationLink = appDomain + "/sportyfi/auth/verify-email?token=" + token.getToken();
 		emailService.sendEmailVerification(user.getEmail(), verificationLink);
 
 		//        String token = UUID.randomUUID().toString();

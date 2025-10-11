@@ -31,27 +31,36 @@ public class VenueController {
         return ResponseEntity.ok(approvedVenue);
     }
     
+    @PostMapping("/reject/{venueRequestId}")
+    public ResponseEntity<Venues> rejectVenue(@PathVariable UUID venueRequestId) {
+        Venues approvedVenue = venueService.rejectVenueRequest(venueRequestId);
+        return ResponseEntity.ok(approvedVenue);
+    }
+    
 //    @GetMapping
 //    public ResponseEntity<List<Venues>> getAll() {
 //    	System.out.println("this is getting called");
 //        return ResponseEntity.ok(venueService.getAll());
 //    }
     
-    // errrrrrrrrrrrooooooooorrrrrrrrrrrr in dao
+    // errrrrrrrrrrrooooooooorrrrrrrrrrrr in dao -- working now
     @GetMapping
     public List<Venues> getVenues(
             @RequestParam Optional<String> sport,
-            @RequestParam Optional<String> location,
+            @RequestParam Optional<String> city,
             @RequestParam Optional<Integer> minPrice,
             @RequestParam Optional<Integer> maxPrice,
             @RequestParam(name = "search") Optional<String> searchQuery
     ) {
-        return venueService.findVenues(sport, location, minPrice, maxPrice, searchQuery);
+    	System.out.println("---city---" + city);
+        return venueService.findVenues(sport, city, minPrice, maxPrice, searchQuery);
     }
     
     @GetMapping("/{id}")
     public ResponseEntity<Venues> getVenueById(@PathVariable UUID id) {
         return ResponseEntity.ok(venueService.getById(id));
     }
+    
+    //write delete venue method
 }
 

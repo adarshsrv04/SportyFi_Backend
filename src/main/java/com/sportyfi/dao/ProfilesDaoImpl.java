@@ -25,7 +25,7 @@ public class ProfilesDaoImpl implements ProfilesDao {
 		Profiles userProfile = null;
 		try {
 			session = sessionFactory.openSession();
-			//	        tx = session.beginTransaction();
+//	        tx = session.beginTransaction();
 			userProfile = session.get(Profiles.class, userId);
 		} catch (Exception e) {
 			if (session != null && session.getTransaction().isActive()) {
@@ -54,7 +54,7 @@ public class ProfilesDaoImpl implements ProfilesDao {
 			tx = session.beginTransaction();
 
 			String sql = "UPDATE profiles SET username = :username, bio = :bio, location = :location, " +
-					"primary_sport = :primarySport, avatar_url = :avatarUrl, " +
+					"primary_sport = :primarySport, avatar_url = :avatarUrl, contact_phone = :contactPhone, " +
 					"preferred_sports = :preferredSports, updated_at = :updatedAt " +
 					"WHERE id = :id";
 
@@ -66,6 +66,7 @@ public class ProfilesDaoImpl implements ProfilesDao {
 			query.setParameter("avatarUrl", profile.getAvatar_url());
 			query.setParameter("preferredSports", profile.getPreferred_sports()); // PostgreSQL handles arrays
 			query.setParameter("updatedAt", profile.getUpdated_at());
+			query.setParameter("contactPhone", profile.getContact_phone());
 			query.setParameter("id", userId);
 
 			int result = query.executeUpdate();
